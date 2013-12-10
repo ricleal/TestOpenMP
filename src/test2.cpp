@@ -10,26 +10,26 @@
 #include <stdlib.h>
 #include <omp.h>
 
-#define N       50
+#define N  20
 #define CHUNKSIZE   5
 
 int main_test2() {
 
 	int i, chunk, tid;
-	double a[N], b[N], c[N];
+	double in[N], out[N];
 	char first_time;
 
 	/* Some initializations */
 	for (i = 0; i < N; i++)
-		a[i] = b[i] = i * 1.0;
+		in[i] = i;
 
 	chunk = CHUNKSIZE;
 	first_time = 'y';
 
-	omp_set_num_threads(4);
+	omp_set_num_threads(2);
 
 	#pragma omp parallel for     \
-		shared(a,b,c,chunk)        \
+		shared(in,out,chunk)        \
   	  	private(i,tid)             \
   	  	schedule(static,chunk)     \
   	  	firstprivate(first_time)
@@ -39,11 +39,11 @@ int main_test2() {
 			tid = omp_get_thread_num();
 			first_time = 'n';
 			#pragma omp critical
-			std::cout << "First time : tid = " <<tid << " :: i = " << i << " :: c[i] = " << c[i] << std::endl;
+			std::cout << "First time : tid = " <<tid << " :: i = " << i << " :: outi] = " << out[i] << std::endl;
 		}
-		c[i] = a[i] + b[i];
+		out[i] = in[i];
 		#pragma omp critical
-		std::cout << "tid = " <<tid << " :: i = " << i << " :: c[i] = " << c[i] << std::endl;
+		std::cout << "tid = " <<tid << " :: i = " << i << " :: out[i] = " << out[i] << std::endl;
 	}
 
 	return 0;
